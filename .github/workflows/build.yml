@@ -17,8 +17,9 @@ jobs:
           gh release download -R QuestPackageManager/QPM.CLI -p "qpm-linux-x64.zip" -D /tmp
           sudo unzip -o /tmp/qpm-linux-x64.zip -d /usr/local/bin/
           sudo chmod +x /usr/local/bin/qpm
-          curl -fsSL https://githubusercontent.com -o include/dr_mp3.h
-          curl -fsSL https://githubusercontent.com -o include/dr_wav.h
+          gh repo clone mackron/dr_libs /tmp/dr_libs -- --depth 1
+          cp /tmp/dr_libs/dr_mp3.h include/dr_mp3.h
+          cp /tmp/dr_libs/dr_wav.h include/dr_wav.h
       - name: Resolve Dependencies & Build QMOD
         run: |
           qpm restore
