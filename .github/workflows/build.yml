@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install QPM & Ninja
+      - name: Install QPM, Ninja & Single-Header Audio Decoders
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -17,6 +17,8 @@ jobs:
           gh release download -R QuestPackageManager/QPM.CLI -p "qpm-linux-x64.zip" -D /tmp
           sudo unzip -o /tmp/qpm-linux-x64.zip -d /usr/local/bin/
           sudo chmod +x /usr/local/bin/qpm
+          curl -fsSL https://githubusercontent.com -o include/dr_mp3.h
+          curl -fsSL https://githubusercontent.com -o include/dr_wav.h
       - name: Resolve Dependencies & Build QMOD
         run: |
           qpm restore
