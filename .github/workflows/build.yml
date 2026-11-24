@@ -10,10 +10,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install QPM & Ninja
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           sudo apt-get update && sudo apt-get install -y ninja-build unzip
-          curl -fL https://github.com -o /tmp/qpm.zip
-          sudo unzip -o /tmp/qpm.zip -d /usr/local/bin/
+          gh release download -R QuestPackageManager/QPM.CLI -p "qpm-linux-x64.zip" -D /tmp
+          sudo unzip -o /tmp/qpm-linux-x64.zip -d /usr/local/bin/
           sudo chmod +x /usr/local/bin/qpm
       - name: Resolve Dependencies & Build QMOD
         run: |
