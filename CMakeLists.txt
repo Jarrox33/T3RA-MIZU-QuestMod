@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.21)
+include(${CMAKE_CURRENT_LIST_DIR}/qpm_defines.cmake)
+project(${COMPILE_ID})
+set(CMAKE_CXX_STANDARD 20)
+file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
+add_library(${COMPILE_ID} SHARED ${SOURCE_FILES})
+target_include_directories(${COMPILE_ID} PRIVATE include src extern/includes extern/includes/bs-cordl/include)
+include(${CMAKE_CURRENT_LIST_DIR}/extern.cmake)

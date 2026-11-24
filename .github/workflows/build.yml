@@ -1,0 +1,26 @@
+name: Build Quest QMOD
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install QPM & Ninja
+        run: |
+          sudo apt-get update && sudo apt-get install -y ninja-build unzip
+          curl -L https://github.com -o /usr/local/bin/qpm
+          chmod +x /usr/local/bin/qpm
+      - name: Resolve Dependencies & Build QMOD
+        run: |
+          qpm restore
+          qpm ndk resolve
+          qpm s qmod
+      - name: Upload T3RA-MIZU.qmod
+        uses: actions/upload-artifact@v4
+        with:
+          name: T3RA-MIZU-qmod
+          path: T3RA-MIZU.qmod

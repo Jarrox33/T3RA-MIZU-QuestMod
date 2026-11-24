@@ -1,0 +1,6 @@
+{
+  "_QPVersion": "0.1.1", "name": "${mod_name}", "id": "${mod_id}", "author": "Jarrox33", "version": "${version}",
+  "packageId": "com.beatgames.beatsaber", "packageVersion": "1.40.8_7379",
+  "description": "All-in-one C++ VR Beat Saber auto-mapper and mod suite.",
+  "dependencies": [], "modFiles": ["${binary}"], "libraryFiles": [], "fileCopies": []
+}
