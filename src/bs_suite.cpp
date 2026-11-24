@@ -23,7 +23,7 @@ static void writeSynthBeatWav(const std::string& wavPath, double bpm, int second
         double t = (double)i / sr, bPos = std::fmod(t, spb), hPos = std::fmod(t, spb * 0.5), s = 0.0;
         if (bPos < 0.14) s += 0.65 * std::exp(-bPos * 28.0) * std::sin(6.2831853 * (52.0 + 110.0 * std::exp(-bPos * 45.0)) * bPos);
         if (hPos < 0.045) { uint32_t n = (uint32_t)(i * 1103515245u + 12345u); s += 0.22 * std::exp(-hPos * 85.0) * (((n >> 16) & 0x7FFF) / 16384.0 - 1.0); }
-        pcm[i] = (int16_t)(std::max(-1.0, std::min(1.0, s)) * 30000.0);
+        pcm.at(i) = (int16_t)(std::max(-1.0, std::min(1.0, s)) * 30000.0);
     }
     std::ofstream out(wavPath, std::ios::binary);
     int32_t dataSz = total * 2, fileSz = 36 + dataSz, fmtLen = 16, byteRate = sr * 2;
@@ -35,8 +35,7 @@ static void writeSynthBeatWav(const std::string& wavPath, double bpm, int second
     out.write((char*)pcm.data(), dataSz);
 }
 std::string runPatternTrainer(int mode, double bpm, int seconds) {
-    const char* names = {"Streams", "Jumps", "TechCrossovers", "Bursts", "DiagonalWindows", "WallDodgeStreams"};
-    std::string modeName = (mode >= 1 && mode <= 6) ? names[mode - 1] : "Streams";
+    std::string modeName = (mode == 2) ? "Jumps" : (mode == 3) ? "TechCrossovers" : (mode == 4) ? "Bursts" : (mode == 5) ? "DiagonalWindows" : (mode == 6) ? "WallDodgeStreams" : "Streams";
     fs::path outDir = fs::path(LEVELS_DIR) / ("CPP_VR_" + modeName + "_" + std::to_string((int)bpm) + "BPM");
     fs::create_directories(outDir);
     writeSynthBeatWav((outDir / "song.wav").string(), bpm, seconds);
@@ -63,7 +62,7 @@ std::string runPatternTrainer(int mode, double bpm, int seconds) {
 std::string randomizeHSV() {
     fs::create_directories(fs::path(HSV_PATH).parent_path());
     std::random_device rd; std::mt19937 gen(rd()); std::uniform_real_distribution<float> d(0.15f, 1.0f);
-    auto col = [&]() { char buf; std::snprintf(buf, sizeof(buf), "[%.2f,%.2f,%.2f,1.0]", d(gen), d(gen), d(gen)); return std::string(buf); };
+    auto col = [&]() { char buf[48]; std::snprintf(buf, sizeof(buf), "[%.2f,%.2f,%.2f,1.0]", d(gen), d(gen), d(gen)); return std::string(buf); };
     std::ofstream(HSV_PATH) << "{\"majorVersion\":3,\"minorVersion\":3,\"patchVersion\":0,\"useFixedPos\":false,\"judgments\":[{\"threshold\":115,\"text\":\"%s\",\"color\":" << col() << ",\"fade\":true},{\"threshold\":110,\"text\":\"%s\",\"color\":" << col() << ",\"fade\":true},{\"threshold\":100,\"text\":\"%s\",\"color\":" << col() << ",\"fade\":true},{\"threshold\":0,\"text\":\"%s\",\"color\":" << col() << ",\"fade\":true}]}";
     return "HSV Neon Colors Randomized!";
 }
@@ -75,14 +74,14 @@ static void writeGeometricBmp(const std::string& bmpPath, uint32_t seed) {
     for (int y = 0; y < H; ++y) for (int x = 0; x < W; ++x) {
         int dist = (int)std::sqrt((x - 128) * (x - 128) + (y - 128) * (y - 128));
         size_t i = (y * W + x) * 3;
-        if (x % 32 == 0 || y % 32 == 0) { px[i] = b1 / 3; px[i + 1] = g1 / 3; px[i + 2] = r1 / 3; }
-        if (std::abs(dist - 95) < 4 || std::abs(dist - 55) < 4) { px[i] = b1; px[i + 1] = g1; px[i + 2] = r1; }
-        if (std::abs((x - y) + 25) < 5 || std::abs((x - y) - 25) < 5) { px[i] = b2; px[i + 1] = g2; px[i + 2] = r2; }
+        if (x % 32 == 0 || y % 32 == 0) { px.at(i) = b1 / 3; px.at(i + 1) = g1 / 3; px.at(i + 2) = r1 / 3; }
+        if (std::abs(dist - 95) < 4 || std::abs(dist - 55) < 4) { px.at(i) = b1; px.at(i + 1) = g1; px.at(i + 2) = r1; }
+        if (std::abs((x - y) + 25) < 5 || std::abs((x - y) - 25) < 5) { px.at(i) = b2; px.at(i + 1) = g2; px.at(i + 2) = r2; }
     }
     std::ofstream out(bmpPath, std::ios::binary);
     uint32_t imgSz = W * H * 3, fileSz = 54 + imgSz;
-    uint8_t hdr = {'B','M',0,0,0,0,0,0,0,0,54,0,0,0,40,0,0,0,0,1,0,0,0,1,0,0,1,0,24,0};
-    *reinterpret_cast<uint32_t*>(&hdr) = fileSz; *reinterpret_cast<uint32_t*>(&hdr) = imgSz;
+    uint8_t hdr[54] = {'B','M',0,0,0,0,0,0,0,0,54,0,0,0,40,0,0,0,0,1,0,0,0,1,0,0,1,0,24,0};
+    *reinterpret_cast<uint32_t*>(hdr + 2) = fileSz; *reinterpret_cast<uint32_t*>(hdr + 34) = imgSz;
     out.write((char*)hdr, 54); out.write((char*)px.data(), imgSz);
 }
 
@@ -100,7 +99,7 @@ std::string buildAllPlaylists() {
     writeGeometricBmp((fs::path(COV_DIR) / "T3RA_Speed_200.png").string(), 2002026);
     std::ofstream pl(fs::path(PL_DIR) / "T3RA_Speed_200.bplist");
     pl << "{\"playlistTitle\":\"T3RA 200+ BPM Speed\",\"playlistAuthor\":\"T3RA//MIZU VR\",\"songs\":[";
-    for (size_t i = 0; i < fast.size(); ++i) pl << "{\"songName\":\"" << fast[i] << "\"}" << (i + 1 < fast.size() ? "," : "");
+    for (size_t i = 0; i < fast.size(); ++i) pl << "{\"songName\":\"" << fast.at(i) << "\"}" << (i + 1 < fast.size() ? "," : "");
     pl << "]}";
     return "Scanned " + std::to_string(scanned) + " maps -> Built T3RA Playlists!";
 }
@@ -119,12 +118,5 @@ std::string speedupLatestMap(double mult) {
     return "Created " + std::to_string((int)(mult * 100)) + "% speed map!";
 }
 
-std::string buildShaffuruMedley(int sliceCount, int sliceSec) { return runPatternTrainer(3, 195.0, sliceCount * sliceSec); }
-}
-    fs::path p = dst / "Info.dat"; std::ifstream in(p); std::string txt((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-    auto pos = txt.find("_beatsPerMinute");
-    if (pos != std::string::npos) { auto col = txt.find(':', pos), end = txt.find(',', col); txt.replace(col + 1, end - col - 1, " " + std::to_string(std::atof(txt.c_str() + col + 1) * mult)); std::ofstream(p) << txt; }
-    return "Created " + std::to_string((int)(mult * 100)) + "% speed map!";
-}
 std::string buildShaffuruMedley(int sliceCount, int sliceSec) { return runPatternTrainer(3, 195.0, sliceCount * sliceSec); }
 }
