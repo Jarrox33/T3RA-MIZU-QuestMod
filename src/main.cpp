@@ -8,6 +8,13 @@
 #include <filesystem>
 #include <vector>
 
+#ifndef MOD_ID
+#define MOD_ID "t3ra-mizu"
+#endif
+#ifndef VERSION
+#define VERSION "0.1.0"
+#endif
+
 namespace fs = std::filesystem;
 static modloader::ModInfo modInfo{MOD_ID, VERSION, 0};
 static int selectedIndex = 0, selectedPreset = 1, patternMode = 1;
@@ -23,9 +30,10 @@ static void refreshAudioList() {
         if (ext == ".mp3" || ext == ".ogg" || ext == ".wav" || ext == ".m4a") audioFiles.push_back(entry.path());
     }
 }
+
 static void didActivate(HMUI::ViewController* self, bool firstActivation, bool, bool) {
     if (!firstActivation) return;
-    auto* parent = BSML::Lite::CreateScrollableSettingsContainer(self->get_transform())->get_transform();
+    auto* parent = BSML::Lite::CreateScrollableSettingsContainer(self->get_transform());
     BSML::Lite::CreateText(parent, "=== T3RA//MIZU All-in-One C++ VR Suite ===");
     refreshAudioList();
     auto* statusText = BSML::Lite::CreateText(parent, audioFiles.empty() ? "Ready (put .mp3/.ogg in /sdcard/Download)" : "Audio: " + audioFiles.front().filename().string());
