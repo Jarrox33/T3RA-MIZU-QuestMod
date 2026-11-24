@@ -4,6 +4,7 @@
   "workspace": { "scripts": {}, "ndk": "^27.2.12479018", "qmodIncludeDirs": ["build", "extern/libs"], "qmodOutput": "T3RA-MIZU.qmod" },
   "dependencies": [
     { "id": "beatsaber-hook", "versionRange": "^6.4.1", "additionalData": {} },
+    { "id": "custom-types", "versionRange": "*", "additionalData": {} },
     { "id": "bsml", "versionRange": "^0.4.55", "additionalData": {} },
     { "id": "songcore", "versionRange": "*", "additionalData": {} },
     { "id": "paper2_scotland2", "versionRange": "*", "additionalData": {} }
