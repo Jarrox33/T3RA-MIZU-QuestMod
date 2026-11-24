@@ -12,13 +12,15 @@ jobs:
       - name: Install QPM & Ninja
         run: |
           sudo apt-get update && sudo apt-get install -y ninja-build unzip
-          curl -L https://github.com -o /usr/local/bin/qpm
-          chmod +x /usr/local/bin/qpm
+          curl -fL https://github.com -o /tmp/qpm.zip
+          sudo unzip -o /tmp/qpm.zip -d /usr/local/bin/
+          sudo chmod +x /usr/local/bin/qpm
       - name: Resolve Dependencies & Build QMOD
         run: |
           qpm restore
-          qpm ndk resolve
-          qpm s qmod
+          qpm ndk resolve -d
+          qpm build
+          qpm qmod zip --import
       - name: Upload T3RA-MIZU.qmod
         uses: actions/upload-artifact@v4
         with:
